@@ -149,8 +149,8 @@ data Tricho (m n : ℕ) : Set where
 ...                         | same n≡m = same (cong suc n≡m)
 
 
---WIP MONO FOR <
-----------------
+
+-----Mono with <-----------
 +-monor-< : ∀ (n p q : ℕ) → p < q → n + p < n + q
 +-monor-< zero p q p<q = p<q
 +-monor-< (suc n) p q p<q = s<s (+-monor-< n p q p<q)
