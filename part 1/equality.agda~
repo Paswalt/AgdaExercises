@@ -1,5 +1,0 @@
--- Equality is (for now) defined as follows
-data _≡_ {A : Set} (x : A) : A → Set where
-  refl : ∀ {x} →  x ≡ x
-
--- Here one parameter and one index comes into play
