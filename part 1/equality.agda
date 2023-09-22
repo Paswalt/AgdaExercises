@@ -282,3 +282,74 @@ even-comm'' m n ev with (n + m) | +-comm n m
 ... | .(m + n) | refl = ev
 
 ---------------------------------------------------------------------------------------------------
+-- Another notion of equality is the leibniz equality
+_≐_ : ∀ {A : Set} (x y : A) → Set₁
+_≐_ {A} x y = ∀ (P : A → Set) → P x → P y
+
+-- This is also an equivalence relation
+≐-refl : ∀ {A : Set} {x : A} → x ≐ x
+≐-refl P Px  = Px
+
+-- Symmetry is non-trivial and uses a smart construction and the fact
+-- that leibniz equality works with -any- predicate. It's a very genius
+-- proof!
+sym-≐ : ∀ {A : Set} {x y : A}
+  → x ≐ y
+    -----
+  → y ≐ x
+sym-≐ {A} {x} {y} x≐y P  = Qy
+  where
+    Q : A → Set
+    Q z = P z → P x
+    Qx : Q x
+    Qx = ≐-refl P
+    Qy : Q y
+    Qy = x≐y Q Qx
+
+
+≐-trans : ∀ {A : Set} {x y z : A} → x ≐ y → y ≐ z → x ≐ z
+≐-trans {A} {x} {y} {z} x≐y y≐z = λ P x₁ → y≐z P (x≐y P x₁)
+
+-- As a final step one can show that both equalities are actually the same
+
+-- The direction ≡ → ≐ follows from substitution law!
+≡-implies-≐ : ∀ {A : Set} {x y : A}
+  → x ≡ y
+    -----
+  → x ≐ y
+  
+≡-implies-≐ x≡y P  = subst P x≡y
+
+-- Next the direction ≐ → ≡ which again works
+-- by constructing a smart predicate.
+≐-implies-≡ : ∀ {A : Set} {x y : A}
+  → x ≐ y
+    -----
+  → x ≡ y
+
+≐-implies-≡ {A} {x} {y} x≐y = Qy
+  where
+    Q : A → Set
+    Q z = x ≡ z
+    Qx : Q x
+    Qx = ≡-refl
+    Qy : Q y
+    Qy = x≐y Q Qx
+
+
+--------------------------------------------------------------------
+-- Lastly, for the definition of ≐ we had to use Set₁
+-- This is because of set theoretical paradoxes. We have
+-- a whole hierarchy, namely Set ≡ Set₀ : (Set₁ : (Set₂ : ...)
+-- and so on. We can have so called universe polymorphism.
+-- This is best explained by looking at the generalized
+-- versions of the equality and the leibniz equality:
+
+open import Level using (Level; _⊔_) renaming (zero to lzero; suc to lsuc)
+
+data _≡′_ {ℓ : Level} {A : Set ℓ} (x : A) : A → Set ℓ where
+  refl′ : x ≡′ x
+
+_≐′_ : ∀ {ℓ : Level} {A : Set ℓ} (x y : A) → Set (lsuc ℓ)
+_≐′_ {ℓ} {A} x y = ∀ (P : A → Set ℓ) → P x → P y
+
