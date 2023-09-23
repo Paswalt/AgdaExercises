@@ -1,7 +1,7 @@
 import Relation.Binary.PropositionalEquality as Eq
 open Eq using (_≡_; refl; cong; cong-app)
 open Eq.≡-Reasoning
-open import Data.Nat using (ℕ; zero; suc; _+_)
+open import Data.Nat using (ℕ; zero; suc; _+_; _*_)
 open import Data.Nat.Properties using (+-comm)
 ---------------------------------------------------Preliminaries-------------------------------------------------------
 -- Lambda expressions can be written as λ{ P₁ → N₁; ⋯ ; Pₙ → Nₙ } for
@@ -130,3 +130,143 @@ open _≃_
   A ≃-∎ = ≃-refl
 
 open ≃-Reasoning
+---------------------------------------------------Embedding-----------------------------------------------------------
+-- An embedding is showing that a type A is 'smaller' than a type B or,
+-- that type A is included inside of type B. It is basically the existance
+-- of an injective function from A to B
+infix 0 _≲_
+record _≲_ (A B : Set) : Set where
+  field
+    to      : A → B
+    from    : B → A
+    from∘to : ∀ (x : A) → from (to x) ≡ x
+open _≲_
+
+-- Embeedding is reflexive, transitive but not symmetric.
+-- It is (weakly) anti-symmetric, if the functions are compatible
+≲-refl : ∀ {A : Set} → A ≲ A
+≲-refl = record { to = λ x → x ; from = λ x → x ; from∘to = λ x → refl }
+
+≲-trans : ∀ {A B C : Set} → A ≲ B → B ≲ C → A ≲ C
+≲-trans A≲B B≲C = record { to = to B≲C ∘ to A≲B
+                         ; from = from A≲B ∘ from B≲C
+                         ; from∘to = λ{x →
+                           begin
+                             (from A≲B ∘ from B≲C) ((to B≲C ∘ to A≲B) x)
+                           ≡⟨⟩
+                             from A≲B (from B≲C (to B≲C (to A≲B x)))
+                           ≡⟨ cong (from A≲B) (from∘to B≲C (to A≲B x)) ⟩
+                             from A≲B (to A≲B x)
+                           ≡⟨ from∘to A≲B x ⟩
+                             x
+                           ∎}
+                         }
+
+≲-antisym : ∀ {A B : Set}
+  → (A≲B : A ≲ B)
+  → (B≲A : B ≲ A)
+  → (to A≲B ≡ from B≲A)
+  → (from A≲B ≡ to B≲A)
+    -------------------
+  → A ≃ B
+
+≲-antisym A≲B B≲A to≡from from≡to = record { to = to A≲B
+                                           ; from = from A≲B
+                                           ; from∘to = from∘to A≲B
+                                           ; to∘from = λ{y →
+                                             begin
+                                               to A≲B (from A≲B y)
+                                             ≡⟨ cong-app to≡from (from A≲B y) ⟩
+                                               from B≲A (from A≲B y)
+                                             ≡⟨ cong (from B≲A) (cong-app from≡to y) ⟩
+                                               from B≲A (to B≲A y)
+                                             ≡⟨ from∘to B≲A y ⟩
+                                               y
+                                             ∎}
+                                           }
+
+-- We can also support tabular reasoning for embedding, analogous to that used for isomorphism:
+module ≲-Reasoning where
+
+  infix  1 ≲-begin_
+  infixr 2 _≲⟨_⟩_
+  infix  3 _≲-∎
+
+  ≲-begin_ : ∀ {A B : Set}
+    → A ≲ B
+      -----
+    → A ≲ B
+  ≲-begin A≲B = A≲B
+
+  _≲⟨_⟩_ : ∀ (A : Set) {B C : Set}
+    → A ≲ B
+    → B ≲ C
+      -----
+    → A ≲ C
+  A ≲⟨ A≲B ⟩ B≲C = ≲-trans A≲B B≲C
+
+  _≲-∎ : ∀ (A : Set)
+      -----
+    → A ≲ A
+  A ≲-∎ = ≲-refl
+
+open ≲-Reasoning
+----------------------------------------------------Exercises----------------------------------------------------------
+≃-implies-≲ : ∀ {A B : Set}
+            → A ≃ B
+            -------
+            → A ≲ B
+            
+≃-implies-≲ A≃B = record { to = to A≃B ; from = from A≃B ; from∘to = from∘to A≃B }
+
+-- We define equivalence of propositions as follows
+record _⇔_ (A B : Set) : Set where
+  field
+    to   : A → B
+    from : B → A
+open _⇔_
+-- Remember, propostions are indistinguishable from types! Therefore A → B is an implication
+-- of propistion A and B and B → A vice versa. Together, they make up equivalence
+-- Propositional equivalence is also an equivalence relation
+
+⇔-refl : ∀ {A B : Set} → A ⇔ A
+⇔-refl = record { to = λ{x → x} ; from = λ{x → x} }
+
+⇔-sym : ∀ {A B : Set} → A ⇔ B → B ⇔ A
+⇔-sym A⇔B = record { to = from A⇔B ; from = to A⇔B }
+
+⇔-trans : ∀ {A B C : Set} → A ⇔ B → B ⇔ C → A ⇔ C
+⇔-trans A⇔B B⇔C = record { to = to B⇔C ∘ to A⇔B ; from = from A⇔B ∘ from B⇔C }
+-------------------------------------------Stretch Exercise------------------------------------------------------------
+data Bin : Set where
+  ⟨⟩ : Bin
+  _O : Bin → Bin
+  _I : Bin → Bin
+
+inc : Bin → Bin
+inc ⟨⟩ = ⟨⟩ I
+inc (x O) = x I
+inc (x I) = (inc x) O
+
+nToBin : ℕ → Bin
+nToBin zero = ⟨⟩ O
+nToBin (suc m) = inc (nToBin m)
+
+fromBinToN : Bin → ℕ
+fromBinToN ⟨⟩ = zero
+fromBinToN (x O) = 0 + 2 * (fromBinToN x)
+fromBinToN (x I) = 1 + 2 * (fromBinToN x)
+
+-- This was alredy proven in a prior chapter
+postulate
+  fromto : ∀ (n : ℕ) → fromBinToN (nToBin n) ≡ n
+
+-- Now we can show the embedding
+n-embedd-bin : ℕ ≲ Bin
+n-embedd-bin = record { to = nToBin ; from = fromBinToN ; from∘to = fromto }
+
+-- We can not find an isomorphism between these two types as to∘from would not be
+-- the identity! As Bin does not require the bitstrings to be canonical we would
+-- have that ⟨⟩ O I is mapped to 1 (suc zero) but this is mapped back to ⟨⟩ I and thus
+-- to∘from (⟨⟩ O I) ≢ ⟨⟩ O I! If we would define the set of canonical bit strings
+-- I think it would be possible to have ℕ ≃ CanBin
