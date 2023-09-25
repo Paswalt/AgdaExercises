@@ -155,7 +155,12 @@ plaw→iad : plaw → iad
 plaw→iad pl A B A→B = pl (¬ A ⊎ B) ⊥ λ x → inj₁ λ x₁ → x (inj₂ (A→B x₁)) 
 
 iad→dmg : iad → dmg
-iad→dmg iad A B ev = {!!}
+iad→dmg iad A B ev with (iad A A λ{x → x}) | (iad B B λ{y → y})
+...                        | inj₁ a | inj₁ b = ⊥-elim (ev (a Data.Product., b))
+...                        | inj₁ a | inj₂ b = inj₂ b
+...                        | inj₂ a | inj₁ b = inj₁ a
+...                        | inj₂ a | inj₂ b = inj₁ a
+
 
 dmg→em : dmg → excluded_middle
 dmg→em dmg A = dmg A (¬ A) λ{ (fst Data.Product., snd) → snd fst}
