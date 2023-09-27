@@ -228,6 +228,19 @@ _ = refl
 -- 3 - 5 for instance will throw an error
 
 -- Exercises
-toWitnessFalse : ∀ {A : Set} {D : Dec A} → ¬ T ⌊ D ⌋ → ¬ A
+False : 𝔹 → Set
+False true   =  ⊥
+False false  =  ⊤
 
-fromWitnessFalse : ∀ {A : Set} {D : Dec A} → ¬ A → ¬ T ⌊ D ⌋
+toWitness' : ∀ {A : Set} {D : Dec A} → False ⌊ D ⌋ → ¬ A
+toWitness' {A} {no x} fd = x
+
+-- toWitness'' : ∀ {A : Set} {D : Dec A} → ¬ T ⌊ D ⌋ → ¬ A
+-- toWitness'' {A} {yes x} t = λ x₁ → t tt
+-- toWitness'' {A} {no x} t = λ x₁ → x x₁
+
+fromWitness' : ∀ {A : Set} {D : Dec A} → ¬ A → False ⌊ D ⌋
+fromWitness' {A} {yes x} na = na x
+fromWitness' {A} {no x} na = tt
+
+
