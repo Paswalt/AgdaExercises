@@ -117,7 +117,7 @@ data Total (m n : ℕ) : Set where
 
 -- We can also define a strict inequality similar to ≤
 data _<_ : ℕ → ℕ → Set where
-  z≤s : ∀ {n : ℕ} →
+  z<s : ∀ {n : ℕ} →
       -----------
       zero < suc n
 
@@ -129,7 +129,7 @@ data _<_ : ℕ → ℕ → Set where
 infix 4 _<_
 
 <-trans : ∀ {m n p : ℕ} → m < n → n < p → m < p
-<-trans z≤s (s<s n<p) = z≤s
+<-trans z<s (s<s n<p) = z<s
 <-trans (s<s m<n) (s<s n<p) = s<s (<-trans m<n n<p)
 
 
@@ -141,8 +141,8 @@ data Tricho (m n : ℕ) : Set where
 
 <-tricho : ∀ (m n : ℕ) → Tricho m n
 <-tricho zero zero = same refl
-<-tricho zero (suc n) = forward z≤s
-<-tricho (suc m) zero = flipped z≤s
+<-tricho zero (suc n) = forward z<s
+<-tricho (suc m) zero = flipped z<s
 <-tricho (suc m) (suc n) with <-tricho m n
 ...                         | forward m<n = forward (s<s m<n)
 ...                         | flipped n<m = flipped (s<s n<m)
@@ -167,11 +167,11 @@ data Tricho (m n : ℕ) : Set where
 +-mono-< m n p q m<n p<q = <-trans (+-monol-< m n p m<n) (+-monor-< n p q p<q)
 
 ≤→< : ∀ (m n : ℕ) → suc m ≤ n → m < n
-≤→< zero .(suc _) (s≤s sm≤n) = z≤s
+≤→< zero .(suc _) (s≤s sm≤n) = z<s
 ≤→< (suc m) (suc n) (s≤s sm≤n) = s<s (≤→< m n sm≤n)
 
 <→≤ : ∀ (m n : ℕ) → m < n → suc m ≤ n
-<→≤ .0 .(suc _) z≤s = s≤s z≤n
+<→≤ .0 .(suc _) z<s = s≤s z≤n
 <→≤ (suc m) (suc n) (s<s m<n) = s≤s (<→≤ m n m<n)
 
 ≤-suc : ∀ (n : ℕ) → n ≤ suc n
