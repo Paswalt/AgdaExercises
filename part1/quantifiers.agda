@@ -338,24 +338,6 @@ can-to-id : ∀ (b : Bin) → Can b →  to (from b) ≡ b
 can-to-id .(⟨⟩ O) canZero = refl
 can-to-id b (canOne .b x) = can-to-id-one b x
 
--- The exercise proposes to use the following lemmas
-≡One : ∀ {b : Bin} (o o′ : One b) → o ≡ o′
-≡One singleI singleI = refl
-≡One (oneO b o) (oneO .b o') = cong (oneO b) (≡One o o')
-≡One (oneI b o) (oneI .b o') = cong (oneI b) (≡One o o')
-
-≡Can : ∀ {b : Bin} (cb cb′ : Can b) → cb ≡ cb′
-≡Can canZero canZero = refl
-≡Can canZero (canOne .(⟨⟩ O) (oneO .⟨⟩ ()))
-≡Can (canOne _ (oneO .⟨⟩ ())) canZero
-≡Can (canOne b x) (canOne b x₁) = cong (canOne b ) (≡One x x₁)
-
-proj₁≡→Can≡ : {cb cb′ : ∃[ b ] Can b} → Σ.proj₁ cb ≡ Σ.proj₁ cb′ → cb ≡ cb′
-proj₁≡→Can≡ {⟨ .(⟨⟩ O) , canZero ⟩} {⟨ .(⟨⟩ O) , canZero ⟩} refl = refl
-proj₁≡→Can≡ {⟨ .(⟨⟩ O) , canOne .(⟨⟩ O) (oneO .⟨⟩ ()) ⟩} {⟨ .(⟨⟩ O) , canZero ⟩} refl
-proj₁≡→Can≡ {⟨ .(⟨⟩ O) , canZero ⟩} {⟨ .(⟨⟩ O) , canOne .(⟨⟩ O) (oneO .⟨⟩ ()) ⟩} refl
-proj₁≡→Can≡ {⟨ .proj₄ , canOne .proj₄ x₁ ⟩} {⟨ proj₄ , canOne .proj₄ x ⟩} refl rewrite (≡Can (canOne proj₄ x₁) (canOne proj₄ x)) = refl
-
 +neutral : ∀ (n : ℕ) → n + zero ≡ n
 +neutral zero = refl
 +neutral (suc n) rewrite +-comm n zero = refl
@@ -409,6 +391,24 @@ from-to (suc n) =
   ≡⟨ cong suc (from-to n) ⟩
     suc n
   ∎
+
+-- The exercise proposes to use the following lemmas
+≡One : ∀ {b : Bin} (o o′ : One b) → o ≡ o′
+≡One singleI singleI = refl
+≡One (oneO b o) (oneO .b o') = cong (oneO b) (≡One o o')
+≡One (oneI b o) (oneI .b o') = cong (oneI b) (≡One o o')
+
+≡Can : ∀ {b : Bin} (cb cb′ : Can b) → cb ≡ cb′
+≡Can canZero canZero = refl
+≡Can canZero (canOne .(⟨⟩ O) (oneO .⟨⟩ ()))
+≡Can (canOne _ (oneO .⟨⟩ ())) canZero
+≡Can (canOne b x) (canOne b x₁) = cong (canOne b ) (≡One x x₁)
+
+proj₁≡→Can≡ : {cb cb′ : ∃[ b ] Can b} → Σ.proj₁ cb ≡ Σ.proj₁ cb′ → cb ≡ cb′
+proj₁≡→Can≡ {⟨ .(⟨⟩ O) , canZero ⟩} {⟨ .(⟨⟩ O) , canZero ⟩} refl = refl
+proj₁≡→Can≡ {⟨ .(⟨⟩ O) , canOne .(⟨⟩ O) (oneO .⟨⟩ ()) ⟩} {⟨ .(⟨⟩ O) , canZero ⟩} refl
+proj₁≡→Can≡ {⟨ .(⟨⟩ O) , canZero ⟩} {⟨ .(⟨⟩ O) , canOne .(⟨⟩ O) (oneO .⟨⟩ ()) ⟩} refl
+proj₁≡→Can≡ {⟨ .proj₄ , canOne .proj₄ x₁ ⟩} {⟨ proj₄ , canOne .proj₄ x ⟩} refl rewrite (≡Can (canOne proj₄ x₁) (canOne proj₄ x)) = refl
 
 -- Now onto the isomorphism
 iso : ℕ ≃ ∃[ b ] Can b
