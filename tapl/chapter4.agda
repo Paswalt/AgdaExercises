@@ -44,7 +44,7 @@ data _↪_ : Term → Term → Set where
   E-IsZeroSucc : ∀ {t₁ : Term} → NumericalValue t₁ → TmIsZero (TmSucc t₁) ↪ TmFalse
   E-IsZeroZero : TmIsZero TmZero ↪ TmTrue
   
--- Now we can for example prove the determinacy property from the book:
+-- Now we can for example prove for example, the determinacy property from the book:
 lemma : ∀ {t t' : Term} → t ↪ t' → ¬ Value t
 lemma (E-Succ t↪t') (numericVal (sucNv x)) = lemma t↪t' (numericVal x)
 
@@ -65,3 +65,54 @@ lemma (E-Succ t↪t') (numericVal (sucNv x)) = lemma t↪t' (numericVal x)
 ↪-determinacy (E-IsZeroSucc (sucNv x)) (E-IsZero (E-Succ (E-Succ t↪t''))) = ⊥-elim (lemma t↪t'' (numericVal x))
 ↪-determinacy (E-IsZeroSucc x) (E-IsZeroSucc x₁) = refl
 ↪-determinacy E-IsZeroZero E-IsZeroZero = refl
+
+-- We can also evaluate terms by writing a function for the single-step evaluation rules
+-- For this, we define values a bit more simple in terms of booleans as follows
+data 𝔹 : Set where
+  false : 𝔹
+  true  : 𝔹
+
+isNumericValue : Term → 𝔹
+isNumericValue TmZero = true
+isNumericValue (TmSucc t) = isNumericValue t
+isNumericValue _ = false
+
+isValue : Term → 𝔹
+isValue TmTrue = true
+isValue TmFalse = true
+isValue t = isNumericValue t
+
+-- We also define an option type, equivalent to Haskell's Maybe
+-- to capsule the case when we enter a normal form
+data Option (A : Set) : Set where
+  some    : A → Option A
+  nothing : Option A
+
+eval-helper : Term → Option Term
+
+eval : Term → Option Term
+eval (TmIf TmTrue t₂ t₃)  = some t₂
+eval (TmIf TmFalse t₂ t₃) = some t₃
+eval (TmIf t₁ t₂ t₃) with eval t₁
+... | some t  = some (TmIf t t₂ t₃)
+... | nothing = nothing
+eval (TmPred TmZero) = some TmZero
+eval (TmPred (TmSucc t)) with isNumericValue t
+... | true  = some t 
+... | false = eval-helper (TmPred (TmSucc t))
+eval (TmSucc t₁) with eval t₁
+... | some t  = some (TmSucc t)
+... | nothing = nothing
+eval (TmIsZero TmZero) = some TmTrue
+eval (TmIsZero (TmSucc t)) with isNumericValue t
+... | true  = some TmFalse
+... | false = eval-helper (TmIsZero (TmSucc t))
+eval t = eval-helper t
+
+eval-helper (TmPred t) with eval t
+... | some t₁ = some (TmPred t₁)
+... | nothing = nothing
+eval-helper (TmIsZero t) with eval t
+... | some t₁ = some (TmIsZero t₁)
+... | nothing = nothing
+eval-helper _ = nothing
