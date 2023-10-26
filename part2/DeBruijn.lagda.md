@@ -4,7 +4,7 @@ permalink : /DeBruijn/
 ---
 
 ```agda
-module System-I.part2.DeBruijn where
+module AgdaExercises.part2.DeBruijn where
 ```
 
 The previous two chapters introduced lambda calculus, with a

@@ -4,7 +4,7 @@ permalink : /More/
 ---
 
 ```agda
-module System-I.part2.More where
+module AgdaExercises.part2.More where
 ```
 
 So far, we have focussed on a relatively minimal language, based on

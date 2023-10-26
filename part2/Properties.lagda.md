@@ -4,7 +4,7 @@ permalink : /Properties/
 ---
 
 ```agda
-module System-I.part2.Properties where
+module AgdaExercises.part2.Properties where
 ```
 
 This chapter covers properties of the simply-typed lambda calculus, as

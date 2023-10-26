@@ -4,7 +4,7 @@ permalink : /Lambda/
 ---
 
 ```agda
-module System-I.part2.Lambda where
+module AgdaExercises.part2.Lambda where
 ```
 
 The _lambda-calculus_, first published by the logician Alonzo Church in
